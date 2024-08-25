@@ -20,8 +20,9 @@ func TestChatCompletion(t *testing.T) {
 		}))
 		defer ts.Close()
 
-		c := NewClient(ts.Client(), "test-key")
+		c := NewClient("test-key")
 		c.chatCompletionURL = ts.URL
+		c.httpClient = ts.Client()
 
 		// Test data
 		messages := []Message{
