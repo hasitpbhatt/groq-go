@@ -11,9 +11,42 @@ groq-go is a Go client library for interacting with the Groq API. This library p
 - Easy-to-use client for Groq API
 - Support for chat completions
 - Customizable API requests
-- Error handling and retries
-- Concurrent request support
+
+### Test Example
+
+Here's an example of how to use the `ChatCompletion` function to get chat completions:
+```go
+package main
+
+import (
+	"fmt"
+
+	groq "github.com/hasitpbhatt/groq-go"
+)
+
+func main() {
+
+	resp, err := groq.ChatCompletion([]groq.Message{
+		{
+			Content: "You're an omniscient oracle.",
+			Role:    "system",
+		},
+		{
+			Content: "What is groq cloud?",
+			Role:    "user",
+		},
+	})
+	if err != nil {
+		fmt.Println("Error occurred")
+	}
+
+	for _, c := range resp.Choices {
+		fmt.Println(c.Message.Content)
+	}
+}
+```
+
 
 ## Installation
 
-To install groq-go, use `go get`:
+To install the package, use `go get github.com/hasitpbhatt/groq-go`:

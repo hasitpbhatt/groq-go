@@ -3,9 +3,38 @@ package groq
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
 )
+
+// NewClient creates a new client for interacting with the Groq API.
+// It takes the API key as a parameter and returns a pointer to the client.
+func NewClient(httpClient *http.Client, apiKey string) *Client {
+	if httpClient == nil {
+		httpClient = &http.Client{} // Use default client if none provided
+	}
+	if apiKey == "" {
+		apiKey = os.Getenv("GROQ_API_KEY")
+	}
+	return &Client{
+		apiKey:            apiKey,
+		httpClient:        httpClient, // Initialize the HTTP client
+		chatCompletionURL: "https://api.groq.com/openai/v1/chat/completions",
+	}
+}
+
+// Client represents a client for interacting with the Groq API.
+type Client struct {
+	apiKey            string
+	httpClient        *http.Client // Added field for HTTP client
+	chatCompletionURL string       // Added field for chat completion URL
+}
+
+// SetAPIKey sets the API key for the client.
+func (c *Client) SetAPIKey(apiKey string) {
+	c.apiKey = apiKey
+}
 
 // Message represents a single message in the chat completion request.
 // It contains the role of the message sender (e.g., user or system) and the content of the message itself.
@@ -28,37 +57,34 @@ type RequestBody struct {
 // ChatCompletionResponse represents the structure of the response received from the Groq API for chat completions.
 // It contains the ID of the completion, the object type, the creation time, the model used, the choices made, the usage statistics, the system fingerprint, and the x_groq information.
 type ChatCompletionResponse struct {
-	ID      string `json:"id"`
-	Object  string `json:"object"`
-	Created int    `json:"created"`
-	Model   string `json:"model"`
+	ID      string `json:"id,omitempty"`
+	Object  string `json:"object,omitempty"`
+	Created int    `json:"created,omitempty"`
+	Model   string `json:"model,omitempty"`
 	Choices []struct {
-		Index        int         `json:"index"`
-		Message      Message     `json:"message"`
-		Logprobs     interface{} `json:"logprobs"`
-		FinishReason string      `json:"finish_reason"`
-	} `json:"choices"`
+		Index        int         `json:"index,omitempty"`
+		Message      Message     `json:"message,omitempty"`
+		Logprobs     interface{} `json:"logprobs,omitempty"`
+		FinishReason string      `json:"finish_reason,omitempty"`
+	} `json:"choices,omitempty"`
 	Usage struct {
-		QueueTime        float64 `json:"queue_time"`
-		PromptTokens     int     `json:"prompt_tokens"`
-		PromptTime       float64 `json:"prompt_time"`
-		CompletionTokens int     `json:"completion_tokens"`
-		CompletionTime   float64 `json:"completion_time"`
-		TotalTokens      int     `json:"total_tokens"`
-		TotalTime        float64 `json:"total_time"`
-	} `json:"usage"`
-	SystemFingerprint string `json:"system_fingerprint"`
+		QueueTime        float64 `json:"queue_time,omitempty"`
+		PromptTokens     int     `json:"prompt_tokens,omitempty"`
+		PromptTime       float64 `json:"prompt_time,omitempty"`
+		CompletionTokens int     `json:"completion_tokens,omitempty"`
+		CompletionTime   float64 `json:"completion_time,omitempty"`
+		TotalTokens      int     `json:"total_tokens,omitempty"`
+		TotalTime        float64 `json:"total_time,omitempty"`
+	} `json:"usage,omitempty"`
+	SystemFingerprint string `json:"system_fingerprint,omitempty"`
 	XGroq             struct {
-		ID string `json:"id"`
-	} `json:"x_groq"`
+		ID string `json:"id,omitempty"`
+	} `json:"x_groq,omitempty"`
 }
 
 // ChatCompletion is a function that sends a request to the Groq API for chat completions.
 // It takes a slice of Message as input and returns a pointer to http.Response and an error.
-func ChatCompletion(messages []Message, options ...func(*RequestBody)) (*ChatCompletionResponse, error) {
-	url := "https://api.groq.com/openai/v1/chat/completions"
-	apiKey := os.Getenv("GROQ_API_KEY")
-
+func (c *Client) ChatCompletion(messages []Message, options ...func(*RequestBody)) (*ChatCompletionResponse, error) {
 	body := RequestBody{
 		Messages:    messages,
 		Model:       "llama3-8b-8192",
@@ -78,20 +104,23 @@ func ChatCompletion(messages []Message, options ...func(*RequestBody)) (*ChatCom
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	req, err := http.NewRequest("POST", c.chatCompletionURL, bytes.NewBuffer(jsonData))
 	if err != nil {
 		return nil, err
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+apiKey)
+	req.Header.Set("Authorization", "Bearer "+c.apiKey)
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
 
 	completion := ChatCompletionResponse{}
 	err = json.NewDecoder(resp.Body).Decode(&completion)
