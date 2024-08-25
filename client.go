@@ -25,9 +25,37 @@ type RequestBody struct {
 	Stop        *string   `json:"stop,omitempty"`
 }
 
+// ChatCompletionResponse represents the structure of the response received from the Groq API for chat completions.
+// It contains the ID of the completion, the object type, the creation time, the model used, the choices made, the usage statistics, the system fingerprint, and the x_groq information.
+type ChatCompletionResponse struct {
+	ID      string `json:"id"`
+	Object  string `json:"object"`
+	Created int    `json:"created"`
+	Model   string `json:"model"`
+	Choices []struct {
+		Index        int         `json:"index"`
+		Message      Message     `json:"message"`
+		Logprobs     interface{} `json:"logprobs"`
+		FinishReason string      `json:"finish_reason"`
+	} `json:"choices"`
+	Usage struct {
+		QueueTime        float64 `json:"queue_time"`
+		PromptTokens     int     `json:"prompt_tokens"`
+		PromptTime       float64 `json:"prompt_time"`
+		CompletionTokens int     `json:"completion_tokens"`
+		CompletionTime   float64 `json:"completion_time"`
+		TotalTokens      int     `json:"total_tokens"`
+		TotalTime        float64 `json:"total_time"`
+	} `json:"usage"`
+	SystemFingerprint string `json:"system_fingerprint"`
+	XGroq             struct {
+		ID string `json:"id"`
+	} `json:"x_groq"`
+}
+
 // ChatCompletion is a function that sends a request to the Groq API for chat completions.
 // It takes a slice of Message as input and returns a pointer to http.Response and an error.
-func ChatCompletion(messages []Message, options ...func(*RequestBody)) (*http.Response, error) {
+func ChatCompletion(messages []Message, options ...func(*RequestBody)) (*ChatCompletionResponse, error) {
 	url := "https://api.groq.com/openai/v1/chat/completions"
 	apiKey := os.Getenv("GROQ_API_KEY")
 
@@ -59,7 +87,19 @@ func ChatCompletion(messages []Message, options ...func(*RequestBody)) (*http.Re
 	req.Header.Set("Authorization", "Bearer "+apiKey)
 
 	client := &http.Client{}
-	return client.Do(req)
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	completion := ChatCompletionResponse{}
+	err = json.NewDecoder(resp.Body).Decode(&completion)
+	if err != nil {
+		return nil, err
+	}
+
+	return &completion, nil
 }
 
 // WithModel sets the model for the request body.
