@@ -7,11 +7,14 @@ import (
 	"os"
 )
 
+// Message represents a single message in the chat completion request.
+// It contains the role of the message sender (e.g., user or system) and the content of the message itself.
 type Message struct {
 	Role    string `json:"role"`
 	Content string `json:"content"`
 }
 
+// RequestBody represents the structure of the request body sent to the Groq API for chat completion.
 type RequestBody struct {
 	Messages    []Message `json:"messages"`
 	Model       string    `json:"model"`
@@ -22,6 +25,8 @@ type RequestBody struct {
 	Stop        *string   `json:"stop,omitempty"`
 }
 
+// ChatCompletion is a function that sends a request to the Groq API for chat completions.
+// It takes a slice of Message as input and returns a pointer to http.Response and an error.
 func ChatCompletion(messages []Message) (*http.Response, error) {
 	url := "https://api.groq.com/openai/v1/chat/completions"
 	apiKey := os.Getenv("GROQ_API_KEY")
