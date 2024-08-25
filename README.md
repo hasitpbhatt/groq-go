@@ -1,5 +1,4 @@
 # groq-go
-# groq-go
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/hasitpbhatt/groq-go.svg)](https://pkg.go.dev/github.com/hasitpbhatt/groq-go)
 [![Go Report Card](https://goreportcard.com/badge/github.com/hasitpbhatt/groq-go)](https://goreportcard.com/report/github.com/hasitpbhatt/groq-go)
