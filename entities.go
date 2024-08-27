@@ -39,6 +39,12 @@ type requestBody struct {
 	Model string `json:"model"`
 	// MaxTokens sets the maximum number of tokens to generate.
 	MaxTokens int `json:"max_tokens"`
+	// ResponseFormat specifies the format of the response.
+	ResponseFormat struct {
+		Type string `json:"type"`
+	} `json:"response_format,omitempty"`
+	// Seed sets the seed for the random number generator.
+	Seed int `json:"seed,omitempty"`
 	// Stream indicates whether to stream the response.
 	Stream bool `json:"stream"`
 	// Stop specifies the sequence where the text generation should stop.

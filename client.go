@@ -100,3 +100,25 @@ func WithTopP(topP float64) func(*requestBody) {
 		rb.TopP = topP
 	}
 }
+
+// WithJSON sets the response format to json_type for the request body.
+func WithJSON() func(*requestBody) {
+	return func(rb *requestBody) {
+		rb.ResponseFormat.Type = "json_object"
+		rb.Stream = false
+	}
+}
+
+// WithSeed sets the seed value for the request body.
+func WithSeed(seed int) func(*requestBody) {
+	return func(rb *requestBody) {
+		rb.Seed = seed
+	}
+}
+
+// WithStop sets the stop sequence for the request body.
+func WithStop(stop string) func(*requestBody) {
+	return func(rb *requestBody) {
+		rb.Stop = &stop
+	}
+}
