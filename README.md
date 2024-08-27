@@ -26,9 +26,11 @@ import (
 
 func main() {
 
-	resp, err := groq.ChatCompletion([]groq.Message{
+	client := groq.NewClient()
+
+	resp, err := client.ChatCompletion([]groq.Message{
 		{
-			Content: "You're an omniscient oracle.",
+			Content: "You're a seasoned developer",
 			Role:    "system",
 		},
 		{

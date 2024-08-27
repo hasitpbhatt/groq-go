@@ -10,15 +10,18 @@ import (
 
 // NewClient creates a new client for interacting with the Groq API.
 // It takes the API key as a parameter and returns a pointer to the client.
-func NewClient(apiKey string) *Client {
-	if apiKey == "" {
-		apiKey = os.Getenv("GROQ_API_KEY")
-	}
-	return &Client{
-		apiKey:            apiKey,
+func NewClient(options ...ClientOption) *Client {
+	client := &Client{
 		httpClient:        &http.Client{}, // Initialize the HTTP client
 		chatCompletionURL: "https://api.groq.com/openai/v1/chat/completions",
+		apiKey:            os.Getenv("GROQ_API_KEY"),
 	}
+
+	for _, option := range options {
+		option(client)
+	}
+
+	return client
 }
 
 // ChatCompletion is a function that sends a request to the Groq API for chat completions.

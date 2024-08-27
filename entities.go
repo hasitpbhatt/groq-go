@@ -22,6 +22,16 @@ type Message struct {
 // Option represents a function that modifies the requestBody.
 type Option func(*requestBody)
 
+// ClientOption represents a function that modifies the Client.
+type ClientOption func(*Client)
+
+// WithAPIKey sets the API key for the client.
+func WithAPIKey(apiKey string) ClientOption {
+	return func(c *Client) {
+		c.apiKey = apiKey
+	}
+}
+
 type requestBody struct {
 	// Messages represents a slice of Message structures for the chat completion request.
 	Messages []Message `json:"messages"`

@@ -12,6 +12,11 @@ import (
 
 func TestChatCompletion(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
+
+		c := NewClient(WithAPIKey("test-key"))
+		// Test the client's API key is set correctly
+		assert.Equal(t, "test-key", c.apiKey)
+
 		// Mock server
 		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
@@ -20,7 +25,6 @@ func TestChatCompletion(t *testing.T) {
 		}))
 		defer ts.Close()
 
-		c := NewClient("test-key")
 		c.chatCompletionURL = ts.URL
 		c.httpClient = ts.Client()
 
@@ -53,15 +57,17 @@ func TestChatCompletion(t *testing.T) {
 
 		// Set API key for the test
 		os.Setenv("GROQ_API_KEY", "test-key")
+		defer func() {
+			os.Unsetenv("GROQ_API_KEY")
+		}()
 
 		// Test data
 		messages := []Message{
 			{Role: "user", Content: "Hello, world!"},
 		}
 
-		c := Client{
-			httpClient: ts.Client(),
-		}
+		c := NewClient()
+		c.httpClient = ts.Client()
 
 		// Call the function under test
 		completion, err := c.ChatCompletion(messages)
