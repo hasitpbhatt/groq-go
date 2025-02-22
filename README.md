@@ -26,6 +26,7 @@ import (
 
 func main() {
 
+	// Automatically read API key from GROQ_API_KEY environment variable
 	client := groq.NewClient()
 
 	resp, err := client.ChatCompletion([]groq.Message{
