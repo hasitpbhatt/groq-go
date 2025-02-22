@@ -78,3 +78,58 @@ func TestChatCompletion(t *testing.T) {
 		assert.NotNil(t, err)
 	})
 }
+
+func TestFilterMessages(t *testing.T) {
+        tests := []struct {
+                name     string
+                messages []Message
+                want     []Message
+        }{
+                {
+                        name:     "empty messages",
+                        messages: []Message{},
+                        want:     []Message{},
+                },
+                {
+                        name: "no empty content",
+                        messages: []Message{
+                                {Role: "user", Content: "Hello"},
+                                {Role: "assistant", Content: "World"},
+                        },
+                        want: []Message{
+                                {Role: "user", Content: "Hello"},
+                                {Role: "assistant", Content: "World"},
+                        },
+                },
+                {
+                        name: "mixed empty and non-empty content",
+                        messages: []Message{
+                                {Role: "user", Content: "Hello"},
+                                {Role: "assistant", Content: ""},
+                                {Role: "user", Content: "World"},
+                                {Role: "system", Content: ""},
+                                {Role: "user", Content: "Test"},
+                        },
+                        want: []Message{
+                                {Role: "user", Content: "Hello"},
+                                {Role: "user", Content: "World"},
+                                {Role: "user", Content: "Test"},
+                        },
+                },
+                {
+                        name: "all empty content",
+                        messages: []Message{
+                                {Role: "user", Content: ""},
+                                {Role: "assistant", Content: ""},
+                        },
+                        want: []Message{},
+                },
+        }
+
+        for _, tt := range tests {
+                t.Run(tt.name, func(t *testing.T) {
+                        got := filterMessages(tt.messages)
+			assert.Equal(t, got, tt.want)
+                })
+        }
+}
