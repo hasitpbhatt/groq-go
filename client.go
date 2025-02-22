@@ -28,7 +28,7 @@ func NewClient(options ...ClientOption) *Client {
 // It takes a slice of Message as input and returns a pointer to http.Response and an error.
 func (c *Client) ChatCompletion(messages []Message, options ...Option) (*ChatCompletionResponse, error) {
 	body := requestBody{
-		Messages:    messages,
+		Messages:    filterMessages(messages),
 		Model:       "llama3-8b-8192",
 		Temperature: 1,
 		MaxTokens:   1024,
