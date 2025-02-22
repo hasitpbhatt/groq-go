@@ -41,7 +41,7 @@ type requestBody struct {
 	MaxTokens int `json:"max_tokens"`
 	// ResponseFormat specifies the format of the response.
 	ResponseFormat struct {
-		Type string `json:"type"`
+		Type string `json:"type,omitempty"`
 	} `json:"response_format,omitempty"`
 	// Seed sets the seed for the random number generator.
 	Seed int `json:"seed,omitempty"`
