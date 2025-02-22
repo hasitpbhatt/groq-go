@@ -73,6 +73,16 @@ func (c *Client) ChatCompletion(messages []Message, options ...Option) (*ChatCom
 	return &completion, nil
 }
 
+func filterMessages(messages []Message) []Message {
+        filteredMessages := []Message{}
+        for _, msg := range messages {
+                if len(msg.Content) > 0 {
+                        filteredMessages = append(filteredMessages, msg)
+                }
+        }
+        return filteredMessages
+}
+
 // WithModel sets the model for the request body.
 func WithModel(model string) func(*requestBody) {
 	return func(rb *requestBody) {
