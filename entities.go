@@ -32,6 +32,10 @@ func WithAPIKey(apiKey string) ClientOption {
 	}
 }
 
+type ResponseFormat struct {
+	Type string `json:"type,omitempty"`
+}
+
 type requestBody struct {
 	// Messages represents a slice of Message structures for the chat completion request.
 	Messages []Message `json:"messages"`
@@ -40,9 +44,7 @@ type requestBody struct {
 	// MaxTokens sets the maximum number of tokens to generate.
 	MaxTokens int `json:"max_tokens"`
 	// ResponseFormat specifies the format of the response.
-	ResponseFormat struct {
-		Type string `json:"type,omitempty"`
-	} `json:"response_format,omitempty"`
+	ResponseFormat *ResponseFormat `json:"response_format,omitempty"`
 	// Seed sets the seed for the random number generator.
 	Seed int `json:"seed,omitempty"`
 	// Stream indicates whether to stream the response.
